@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TC App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-light">
+    <header class="app-header">
+        <div class="header-left">
+            <button id="menu-toggle" class="btn-icon" onclick="toggleSidebar()">☰</button>
+            <h1 class="app-title">TC App</h1>
+        </div>
+        <div class="header-right">
+            <span id="user-info" class="user-info"></span>
+        </div>
+    </header>
+
+    <div id="sidebar" class="sidebar">
+        <ul class="sidebar-menu">
+            <li onclick="showView('location-view'); toggleSidebar();">Home</li>
+            <li>Outbound</li>
+            <li>Inbound</li>
+            <li>Settings</li>
+            <li onclick="showView('login-view'); toggleSidebar();">Logout</li>
+        </ul>
+    </div>
+    <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
+
+    <main id="app-container" class="container">
+        <!-- Views will be injected here -->
+        <div id="login-view" class="view active">
+            <div class="banner warning-banner">
+                <p><strong>Please do not share your password with anyone.</strong></p>
+                <p>Any user found sharing password with any one whatsoever case may be,</p>
+                <p class="text-danger"><strong>strict disciplinary action including termination</strong> will be
+                    initiated against the defaulter.</p>
+            </div>
+
+            <div class="card login-card">
+                <h2 class="card-title text-center">Login</h2>
+                <hr>
+                <p class="text-center text-muted">Enter LDAP credentials</p>
+
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">User Name</label>
+                        <input type="text" id="username" name="username" placeholder="User Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                    <div class="form-footer">
+                        <a href="#" class="link">Forgot/Update password?</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="info-alert mt-4">
+                <span class="info-icon">ℹ️</span>
+                <span>Login issues? Contact IT team at <a href="mailto:askit@flipkart.com">askit@flipkart.com</a></span>
+                <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
+            </div>
+        </div>
+
+        <!-- Location Selection View -->
+        <div id="location-view" class="view">
+            <h2 class="view-title">Scan/Select Location</h2>
+            <div class="search-container">
+                <input type="text" id="location-search" placeholder="Type location">
+            </div>
+
+            <div id="location-list" class="list-group mt-3">
+                <p class="list-hint">Tap on the location to select</p>
+                <div class="list-item" onclick="selectLocation('MotherHub_STV')">MotherHub_STV</div>
+                <div class="list-item" onclick="selectLocation('MotherHub_STV_BTS')">MotherHub_STV_BTS</div>
+                <div class="list-item" onclick="selectLocation('MotherHub_STV_RSC')">MotherHub_STV_RSC</div>
+                <div class="list-footer text-center mt-3">
+                    <p class="text-muted small">Yay! You have seen it all</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vehicle Selection View -->
+        <div id="vehicle-view" class="view">
+            <div class="breadcrumb">
+                <span id="selected-location-label" class="breadcrumb-item">MotherHub_STV_BTS</span>
+            </div>
+
+            <div class="card mt-3">
+                <div class="form-group">
+                    <label for="vehicle-select">Vehicle</label>
+                    <select id="vehicle-select" onchange="updateVehicle(this.value)">
+                        <option value="" disabled selected>Select Vehicle</option>
+                        <option value="GJ05AA1234">GJ05AA1234</option>
+                        <option value="MH01AA1234">MH01AA1234</option>
+                        <option value="HR02AA1234">HR02AA1234</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="contract-select">Contract type</label>
+                    <select id="contract-select">
+                        <option value="" disabled selected>Select contract type</option>
+                        <option value="Fleet">Fleet</option>
+                        <option value="Co-loader">Co-loader</option>
+                        <option value="Air">Air</option>
+                    </select>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p id="vehicle-error" class="text-danger small mb-2" style="display: none;"></p>
+                    <button id="proceed-btn" class="btn-round btn-pink">
+                        <span class="arrow-right">→</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load Building View -->
+        <div id="load-building-view" class="view">
+            <div class="breadcrumb status-bar">
+                <span>MotherHub_STV_BTS > KA51AH4832 > FLEET > B2C - LINEHAUL</span>
+            </div>
+
+            <div class="progress-section mt-2">
+                <div class="progress-container">
+                    <div id="main-progress-bar" class="progress-bar" style="width: 0%;"></div>
+                </div>
+                <div id="main-progress-text" class="progress-text text-center">0 / 250</div>
+            </div>
+
+            <div class="load-building-header mt-3">
+                <h2 class="view-title-sm">Load Building</h2>
+                <div class="header-actions">
+                    <button id="finish-btn" class="btn btn-outline-blue btn-sm">FINISH</button>
+                    <button id="adhoc-btn" class="btn btn-outline-blue btn-sm ml-2">AD-HOC</button>
+                </div>
+            </div>
+
+            <div class="scan-section mt-3">
+                <div class="scan-controls">
+                    <button id="scan-init-btn" class="btn btn-pink btn-md">SCAN</button>
+                    <div id="scan-input-container" class="ml-2" style="display: none;">
+                        <input type="text" id="shipment-scan-input" placeholder="Scan Shipment ID" class="input-std">
+                        <div id="scan-error-msg" class="text-danger text-xs mt-1" style="display: none;"></div>
+                    </div>
+                </div>
+                <div class="checkbox-group ml-3">
+                    <input type="checkbox" id="remove-chk">
+                    <label for="remove-chk">REMOVE</label>
+                </div>
+                <div class="weight-info ml-auto">
+                    <span id="weight-display" class="text-blue font-bold">0.00kg / 12869.14kg</span>
+                </div>
+            </div>
+
+            <div class="info-row mt-3">
+                <p id="scheduled-departure-container" class="mt-2 text-sm">Scheduled departure : <span
+                        id="scheduled-departure-time">...</span></p>
+            </div>
+
+            <div class="filter-row mt-2">
+                <div class="filter-group">
+                    <label class="small">Cut-off:</label>
+                    <select class="select-sm">
+                        <option>Time</option>
+                    </select>
+                </div>
+                <div class="filter-group ml-auto">
+                    <label class="small">Days:</label>
+                    <select class="select-sm">
+                        <option>3</option>
+                    </select>
+                    <button class="btn-refresh ml-1">🔄</button>
+                </div>
+            </div>
+
+            <div class="table-container mt-3">
+                <table class="shipment-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" checked></th>
+                            <th>To</th>
+                            <th>Service Type</th>
+                            <th>Count</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="checkbox" checked></td>
+                            <td><button class="link-blue"
+                                    onclick="showShipmentDetails('MotherHub_STV')">MotherHub_STV</button></td>
+                            <td>ECONOMY</td>
+                            <td id="count-stv">0/250</td>
+                            <td><button class="btn-remove-row">×</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Shipment Details View -->
+        <div id="shipment-details-view" class="view">
+            <div class="breadcrumb status-bar">
+                <span id="details-breadcrumb">MotherHub_STV_BTS > KA51AH4832 > FLEET > B2C - LINEHAUL >
+                    MotherHub_CJB</span>
+            </div>
+
+            <div class="p-2">
+                <button class="link-blue text-sm mb-2" onclick="showView('load-building-view')">← Back</button>
+
+                <div class="details-section">
+                    <div class="details-header green-bg" onclick="toggleDetails('picked-list')">
+                        <span id="picked-count-label">Picked (0 items)</span>
+                        <span>▼</span>
+                    </div>
+                    <div id="picked-list" class="details-content green-light-bg" style="display: none;">
+                        <div class="detail-row header">
+                            <span>ID</span>
+                            <span>Weight</span>
+                        </div>
+                        <div id="picked-items-container"></div>
+                    </div>
+                </div>
+
+                <div class="details-section mt-2">
+                    <div class="details-header yellow-bg" onclick="toggleDetails('expected-list')">
+                        <span id="expected-count-label">Expected (250 items)</span>
+                        <span>▼</span>
+                    </div>
+                    <div id="expected-list" class="details-content yellow-light-bg" style="display: block;">
+                        <div class="detail-row header">
+                            <span>ID</span>
+                            <span>Weight</span>
+                        </div>
+                        <div id="expected-items-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load Building Summary View -->
+        <div id="load-summary-view" class="view">
+            <div class="breadcrumb status-bar">
+                <span>MotherHub_STV_BTS > GJ01LT8989 > FLEET > B2C - LINEHAUL</span>
+            </div>
+
+            <div class="p-2">
+                <button class="link-blue text-sm mb-2" onclick="showView('load-building-view')">← Back</button>
+                <h2 class="view-title">Load Building Summary</h2>
+
+                <div class="card p-3">
+                    <div class="form-row-details">
+                        <label>Mode</label>
+                        <select class="select-std">
+                            <option>Road</option>
+                        </select>
+                    </div>
+                    <div class="form-row-details mt-2">
+                        <label>Vehicle</label>
+                        <input type="text" id="summary-vehicle-input" value="" disabled class="input-disabled">
+                    </div>
+                    <div class="form-row-details mt-2">
+                        <label>AWB</label>
+                        <input type="text" id="summary-awb-input" value="" class="input-std" placeholder="Enter AWB">
+                    </div>
+
+                    <p id="awb-error" class="text-danger small mt-2 mb-2" style="display: none;"></p>
+                    <button class="btn btn-pink mt-3" onclick="submitSummary()">SUBMIT</button>
+                </div>
+
+                <div class="details-section mt-3">
+                    <div class="details-header bg-white border-top" onclick="toggleDetails('summary-load-details')">
+                        <span>Load details</span>
+                        <span>▼</span>
+                    </div>
+                    <div id="summary-load-details" class="details-content bg-white">
+                        <table class="shipment-table-simple">
+                            <thead>
+                                <tr>
+                                    <th>To</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summary-load-details-body">
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sealing View -->
+        <div id="sealing-view" class="view">
+            <div class="breadcrumb status-bar">
+                <span>MotherHub_STV_BTS > GJ01LT8989 > FLEET > B2C - LINEHAUL > SEALING</span>
+            </div>
+
+            <div class="p-2 mt-4">
+                <div id="seal-rows-container">
+                    <div class="flex-row mb-2">
+                        <input type="text" placeholder="Enter Seal ID" class="input-std mr-2">
+                        <select class="select-std">
+                            <option>Select Seal Type</option>
+                            <option>Bottle Seal</option>
+                            <option>Bag Seal</option>
+                        </select>
+                        <button class="btn-icon-dark ml-2">🗑️</button>
+                    </div>
+                </div>
+
+                <p id="seal-error" class="text-danger small mt-2 mb-2" style="display: none;"></p>
+                <div class="mt-3 flex-row items-center">
+                    <button id="seal-btn" class="btn btn-blue-dark">Seal</button>
+                    <button class="btn-round-sm btn-outline-pink ml-auto" onclick="addSealRow()">+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dock Out View -->
+        <div id="dockout-view" class="view">
+            <div class="breadcrumb status-bar">
+                <span id="dockout-breadcrumb">MotherHub_STV_BTS > GJ01LT8989 > FLEET > B2C - LINEHAUL > SEALING >
+                    DOCKOUT</span>
+            </div>
+
+            <div class="text-center" style="margin-top: 60px;">
+                <p style="font-size: 18px; color: #555; margin-bottom: 20px;">Dock out</p>
+                <button class="btn-round btn-pink" onclick="resetApp()">
+                    <span class="arrow-right">→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Attention Modal -->
+        <div id="attention-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content attention-modal">
+                <h1 class="modal-title">Attention!</h1>
+                <p class="mt-2">The following consignments will be closed.</p>
+                <ol id="closed-consignments-list" class="mt-1 small">
+                    <li><strong>MyntraMH_HYP</strong><br>297235400</li>
+                    <li><strong>MotherHub_HYP</strong><br>297248515</li>
+                </ol>
+                <p class="text-danger font-bold mt-2">The following load units will not be picked.</p>
+                <p id="unpicked-units-list" class="small mt-1">1. ▶ MotherHub_HYP (1627):</p>
+
+                <div class="modal-actions mt-3">
+                    <button class="btn btn-blue-dark btn-sm" onclick="confirmFinish()">YES, GO AHEAD</button>
+                    <button class="btn btn-pink btn-sm ml-2" onclick="closeModal('attention-modal')">NO, WAIT!</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="main.js"></script>
+</body>
+
+</html>

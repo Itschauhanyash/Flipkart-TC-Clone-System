@@ -125,10 +125,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (scanInput) {
+        let scanTimer;
+        
+        // Auto-enter logic via debouncing for physical scanners
+        scanInput.addEventListener('input', (e) => {
+            clearTimeout(scanTimer);
+            scanTimer = setTimeout(() => {
+                if (scanInput.value.trim().length > 3) { // Require minimum sensible barcode length
+                    processScan(scanInput.value.trim());
+                    scanInput.value = '';
+                    scanInput.focus(); // Retain focus for sequential scanning
+                }
+            }, 300); // 300ms debounce
+        });
+
+        // Fallback for manually pressing Enter
         scanInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                processScan(scanInput.value);
-                scanInput.value = '';
+                clearTimeout(scanTimer);
+                if (scanInput.value.trim().length > 0) {
+                    processScan(scanInput.value.trim());
+                    scanInput.value = '';
+                    scanInput.focus();
+                }
             }
         });
     }

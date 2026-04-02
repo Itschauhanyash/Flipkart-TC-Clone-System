@@ -127,28 +127,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (scanInput) {
         let scanTimer;
         
-        // Auto-enter logic via debouncing for physical scanners
+        const triggerScan = () => {
+            const val = scanInput.value.trim();
+            if (val.length > 0) {
+                processScan(val);
+                scanInput.value = '';
+                scanInput.focus();
+            }
+        };
+
+        scanInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                clearTimeout(scanTimer);
+                triggerScan();
+            }
+        });
+
+        // Automatically trigger scan after the user/scanner stops inputting regardless of length
         scanInput.addEventListener('input', (e) => {
             clearTimeout(scanTimer);
             scanTimer = setTimeout(() => {
-                if (scanInput.value.trim().length > 3) { // Require minimum sensible barcode length
-                    processScan(scanInput.value.trim());
-                    scanInput.value = '';
-                    scanInput.focus(); // Retain focus for sequential scanning
-                }
-            }, 300); // 300ms debounce
-        });
-
-        // Fallback for manually pressing Enter
-        scanInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                clearTimeout(scanTimer);
-                if (scanInput.value.trim().length > 0) {
-                    processScan(scanInput.value.trim());
-                    scanInput.value = '';
-                    scanInput.focus();
-                }
-            }
+                triggerScan();
+            }, 600); // Wait 600ms to verify typing/scanning is completed
         });
     }
 

@@ -116,6 +116,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const scanInitBtn = document.getElementById('scan-init-btn');
     const scanInputContainer = document.getElementById('scan-input-container');
     const scanInput = document.getElementById('shipment-scan-input');
+    const removeChk = document.getElementById('remove-chk');
+
+    if (removeChk) {
+        removeChk.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                if (scanInitBtn) scanInitBtn.textContent = 'UNSCAN';
+                if (scanInput) scanInput.style.backgroundColor = '#ffcccc';
+            } else {
+                if (scanInitBtn) scanInitBtn.textContent = 'SCAN';
+                if (scanInput) scanInput.style.backgroundColor = '';
+            }
+        });
+    }
 
     if (scanInitBtn) {
         scanInitBtn.addEventListener('click', () => {
@@ -205,7 +218,16 @@ function resetApp() {
     }
     
     const scanInput = document.getElementById('shipment-scan-input');
-    if (scanInput) scanInput.value = '';
+    if (scanInput) {
+        scanInput.value = '';
+        scanInput.style.backgroundColor = '';
+    }
+    
+    const removeChk = document.getElementById('remove-chk');
+    if (removeChk) removeChk.checked = false;
+    
+    const scanInitBtn = document.getElementById('scan-init-btn');
+    if (scanInitBtn) scanInitBtn.textContent = 'SCAN';
     
     // Hide all validation errors
     const errorIds = ['vehicle-error', 'awb-error', 'seal-error', 'scan-error-msg'];
